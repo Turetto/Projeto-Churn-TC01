@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.eggs/
+
+# uv
+.venv/
+
+
+# Dados
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.feather
+
+# Modelos e artefatos
+models/checkpoints/
+*.pt
+*.pth
+*.pkl
+*.joblib
+
+# MLflow local
+mlruns/
+
+# Notebooks
+.ipynb_checkpoints/
+notebooks/*.html
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credenciais
+.env
+.env.*
+secrets.yaml
