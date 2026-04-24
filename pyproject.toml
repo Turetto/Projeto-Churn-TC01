@@ -18,6 +18,8 @@ dependencies = [
     "numpy>=1.26.0",
     "pydantic>=2.6.0",
     "pandera>=0.18.0",
+    "matplotlib>=3.10.8",
+    "seaborn>=0.13.2",
 ]
 
 [project.optional-dependencies]
