@@ -4,10 +4,8 @@ from pandera import Column, DataFrameSchema, Check
 from pathlib import Path
 from src.features import load_raw_data, NUM_COLS, CAT_COLS
 
-
-# Schema esperado para os dados brutos
 raw_schema = DataFrameSchema({
-    "tenure": Column(float, checks=[
+    "tenure": Column(int, checks=[
         Check.greater_than_or_equal_to(0),
         Check.less_than_or_equal_to(200),
     ]),

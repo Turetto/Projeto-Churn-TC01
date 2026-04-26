@@ -53,6 +53,12 @@ def load_raw_data(path: Path) -> pd.DataFrame:
     # Remover colunas sem valor preditivo
     df = df.drop(columns=DROP_COLS, errors="ignore")
 
+    # Remover linhas duplicadas (novo)
+    n_before = len(df)
+    df = df.drop_duplicates()
+    n_after = len(df)
+    logger.info("Removidas %d linhas duplicadas.", n_before - n_after)
+
     logger.info("Dataset carregado: %d registros, %d colunas.", *df.shape)
     return df
 
