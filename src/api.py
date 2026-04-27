@@ -22,6 +22,7 @@ SEED = 1312
 DB_PATH = Path("models/mlflow.db").resolve()
 MLFLOW_TRACKING_URI = f"sqlite:///{DB_PATH}"
 MODEL_NAME = "ChurnMLP_v1"
+THRESHOLD = 0.30
 
 # Inicializar app
 app = FastAPI(
@@ -120,6 +121,7 @@ async def load_model() -> None:
         model = mlflow.pytorch.load_model(model_uri, map_location=device)
         model.eval()
         logger.info("Modelo carregado do run: %s", best_run_id)
+        logger.info("Threshold de decisão: %.2f", THRESHOLD)
     except Exception as e:
         logger.error("Erro ao carregar modelo: %s", e)
         raise
@@ -181,7 +183,7 @@ async def predict(customer: CustomerFeatures) -> PredictionResponse:
 
     return PredictionResponse(
         churn_probability=round(proba, 4),
-        churn_prediction=int(proba >= 0.5),
+        churn_prediction=int(proba >= THRESHOLD),
         risk_level=risk_level,
         latency_ms=round(latency_ms, 2),
     )
