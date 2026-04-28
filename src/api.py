@@ -87,41 +87,39 @@ class PredictionResponse(BaseModel):
 
 
 # Carregar modelo e preprocessor no startup
+from src.model_selector import load_config
+
 @app.on_event("startup")
 async def load_model() -> None:
-    global model, preprocessor, device
+    global model, preprocessor, device, threshold
 
     logger.info("Iniciando carregamento do modelo...")
     set_seeds(SEED)
     device = get_device()
 
-    # Carregar preprocessor — fit nos dados de treino
+    # Carregar configuração do modelo ativo
+    config = load_config()
+    threshold = config["threshold"]
+    logger.info("Modelo: %s — threshold: %.2f", config["run_name"], threshold)
+
+    # Carregar preprocessor
     try:
         df = load_raw_data(Path("data/raw/telco_churn.csv"))
         X, _ = split_features_target(df)
         preprocessor = build_preprocessor()
         preprocessor.fit(X)
-        logger.info("Preprocessor carregado e fitado.")
+        logger.info("Preprocessor carregado.")
     except Exception as e:
         logger.error("Erro ao carregar preprocessor: %s", e)
         raise
 
-    # Carregar modelo do MLflow
+    # Carregar modelo do run configurado
     try:
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-        runs = mlflow.search_runs(
-            experiment_names=["churn-mlp"],
-            order_by=["metrics.roc_auc DESC"],
-        )
-        if runs.empty:
-            raise ValueError("Nenhum run encontrado no experimento churn-mlp.")
-
-        best_run_id = runs.iloc[0]["run_id"]
-        model_uri = f"runs:/{best_run_id}/model"
+        model_uri = f"runs:/{config['run_id']}/model"
         model = mlflow.pytorch.load_model(model_uri, map_location=device)
         model.eval()
-        logger.info("Modelo carregado do run: %s", best_run_id)
-        logger.info("Threshold de decisão: %.2f", THRESHOLD)
+        logger.info("Modelo carregado: %s", config["run_name"])
     except Exception as e:
         logger.error("Erro ao carregar modelo: %s", e)
         raise
@@ -149,24 +147,19 @@ async def health() -> dict:
 
 @app.post("/predict", response_model=PredictionResponse, tags=["inference"])
 async def predict(customer: CustomerFeatures) -> PredictionResponse:
-    """
-    Recebe features de um cliente e retorna a probabilidade de churn.
-    """
     start = time.time()
 
-    # Converter input para DataFrame
     import pandas as pd
     df_input = pd.DataFrame([customer.model_dump()])
-
-    # Pré-processar
     X_transformed = preprocessor.transform(df_input)
 
-    # Inferência
     X_tensor = torch.FloatTensor(X_transformed).to(device)
     with torch.no_grad():
         proba = model.predict_proba(X_tensor).item()
 
-    # Classificar nível de risco
+    # Usar threshold carregado da configuração
+    churn_pred = int(proba >= threshold)
+
     if proba < 0.3:
         risk_level = "low"
     elif proba < 0.6:
@@ -177,13 +170,26 @@ async def predict(customer: CustomerFeatures) -> PredictionResponse:
     latency_ms = (time.time() - start) * 1000
 
     logger.info(
-        "Predição — prob=%.4f, risk=%s, latency=%.1fms",
-        proba, risk_level, latency_ms,
+        "Predição — prob=%.4f, threshold=%.2f, pred=%d, risk=%s, latency=%.1fms",
+        proba, threshold, churn_pred, risk_level, latency_ms,
     )
 
     return PredictionResponse(
         churn_probability=round(proba, 4),
-        churn_prediction=int(proba >= THRESHOLD),
+        churn_prediction=churn_pred,
         risk_level=risk_level,
         latency_ms=round(latency_ms, 2),
     )
+
+@app.get("/model-info", tags=["monitoring"]) # novo
+async def model_info() -> dict:
+    """Retorna informações sobre o modelo ativo."""
+    from src.model_selector import load_config
+    config = load_config()
+    return {
+        "run_name":  config["run_name"],
+        "run_id":    config["run_id"],
+        "threshold": config["threshold"],
+        "roc_auc":   config["roc_auc"],
+        "recall":    config["recall"],
+    }
