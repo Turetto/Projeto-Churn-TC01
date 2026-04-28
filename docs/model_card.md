@@ -46,17 +46,18 @@ de cancelamento (churn), permitindo ações proativas de retenção.
 - OneHotEncoder nas features categóricas
 
 ## 4. Arquitetura do Modelo
-Input (44 features)
-↓
-Linear(44→128) → BatchNorm → ReLU → Dropout(0.4)
-↓
-Linear(128→64) → BatchNorm → ReLU → Dropout(0.4)
-↓
-Linear(64→32)  → BatchNorm → ReLU → Dropout(0.4)
-↓
-Linear(32→1)   → Sigmoid
-↓
-Output — probabilidade de churn [0, 1]
+
+    Input (44 features)
+        ↓
+    Linear(44→128) → BatchNorm → ReLU → Dropout(0.4)
+        ↓
+    Linear(128→64) → BatchNorm → ReLU → Dropout(0.4)
+        ↓
+    Linear(64→32)  → BatchNorm → ReLU → Dropout(0.4)
+        ↓
+    Linear(32→1)   → Sigmoid
+        ↓
+    Output — probabilidade de churn [0, 1]
 
 | Hiperparâmetro | Valor |
 |----------------|-------|
