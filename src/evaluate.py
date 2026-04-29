@@ -1,8 +1,8 @@
-import logging
+from sklearn.model_selection import train_test_split
+from src.features import load_raw_data, split_features_target, build_preprocessor
+from src.train import train_model, get_device, set_seeds
+from src.model import ChurnMLP
 from pathlib import Path
-
-import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.metrics import (
     roc_auc_score,
     average_precision_score,
@@ -13,8 +13,10 @@ from sklearn.metrics import (
     roc_curve,
     precision_recall_curve,
 )
+import numpy as np
+import matplotlib.pyplot as plt
+import logging
 import torch
-from src.model import ChurnMLP
 
 logger = logging.getLogger(__name__)
 
@@ -236,11 +238,7 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s — %(levelname)s — %(message)s",
     )
-
-    from sklearn.model_selection import train_test_split
-    from src.features import load_raw_data, split_features_target, build_preprocessor
-    from src.train import train_model, get_device, set_seeds
-
+ 
     SEED = 1312
     set_seeds(SEED)
     device = get_device()

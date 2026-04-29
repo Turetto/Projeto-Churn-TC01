@@ -1,9 +1,8 @@
-import numpy as np
-import torch
 from src.model import build_model
 from src.features import build_preprocessor, load_raw_data, split_features_target
 from src.train import set_seeds, get_device
 from pathlib import Path
+import torch
 
 SEED = 1312
 INPUT_DIM = 44

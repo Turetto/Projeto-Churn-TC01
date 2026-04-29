@@ -1,13 +1,13 @@
+from pathlib import Path
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from src.features import load_raw_data, split_features_target, build_preprocessor
+from src.model import ChurnMLP, build_model
+import numpy as np
+import torch.nn as nn
 import logging
 import random
-from pathlib import Path
-
-import numpy as np
 import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
-
-from src.model import ChurnMLP, build_model
 
 logger = logging.getLogger(__name__)
 
@@ -234,10 +234,6 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s — %(levelname)s — %(message)s",
     )
-
-    from pathlib import Path
-    from sklearn.model_selection import train_test_split
-    from src.features import load_raw_data, split_features_target, build_preprocessor
 
     # Carregar dados
     df = load_raw_data(Path("data/raw/telco_churn.csv"))

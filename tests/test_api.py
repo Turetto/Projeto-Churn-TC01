@@ -1,6 +1,6 @@
-import pytest
 from fastapi.testclient import TestClient
 from src.api import app
+import pytest
 
 VALID_PAYLOAD = {
   "Contract": "Month-to-month",

@@ -1,5 +1,3 @@
-import pandas as pd
-import pandera as pa
 from pandera import Column, DataFrameSchema, Check
 from pathlib import Path
 from src.features import load_raw_data, NUM_COLS, CAT_COLS

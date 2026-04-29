@@ -1,11 +1,9 @@
-import logging
 from pathlib import Path
-
-import numpy as np
-import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+import pandas as pd
+import logging
 
 logger = logging.getLogger(__name__)
 

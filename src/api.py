@@ -1,15 +1,13 @@
-import logging
-import time
 from pathlib import Path
-
-import numpy as np
-import torch
-import mlflow.pytorch
 from fastapi import FastAPI, Request
 from pydantic import BaseModel, Field
-
 from src.features import build_preprocessor, load_raw_data, split_features_target
 from src.train import get_device, set_seeds
+from src.model_selector import load_config
+import logging
+import time
+import torch
+import mlflow.pytorch
 
 logging.basicConfig(
     level=logging.INFO,
@@ -84,10 +82,6 @@ class PredictionResponse(BaseModel):
     churn_prediction: int = Field(..., description="Predição binária (0=não, 1=sim)")
     risk_level: str = Field(..., description="low, medium ou high")
     latency_ms: float = Field(..., description="Latência da inferência em ms")
-
-
-# Carregar modelo e preprocessor no startup
-from src.model_selector import load_config
 
 @app.on_event("startup")
 async def load_model() -> None:
